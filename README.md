@@ -1,2 +1,2 @@
 # VoicePen
-*Submission for WEC GSOC Recruitment 2023*
+*Submission for WEC GDSC Recruitment 2023*
