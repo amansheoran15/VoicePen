@@ -1,16 +1,17 @@
-const express = require("express");
-const path = require("path");
-const axios = require("axios")
-// const audioURL = "https://bit.ly/3yxKEIY"
-const APIKey = "7d823a3e6ffe44f29465aabf105aadc8"
-const bodyParser = require('body-parser');
-const AWS = require('aws-sdk');
-const fs = require('fs');
-const multer = require('multer');
-const upload = multer();
-const stream = require('stream');
-const { Readable } = require('stream');
-const {response} = require("express");
+import express from 'express';
+import path from 'path';
+import axios from "axios";
+// const axios = require("axios")
+// // const audioURL = "https://bit.ly/3yxKEIY"
+// const APIKey = "7d823a3e6ffe44f29465aabf105aadc8"
+// const bodyParser = require('body-parser');
+// const AWS = require('aws-sdk');
+import fs from 'fs';
+// const multer = require('multer');
+// const upload = multer();
+// const stream = require('stream');
+// const { Readable } = require('stream');
+// const {response} = require("express");
 const refreshInterval = 5000
 
 
@@ -20,6 +21,10 @@ const app = express();
 let audioURL;
 let audioBuffer;
 
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 app.use(express.static(path.join(__dirname,"public")));
 
 // app.get("/",(req,res)=>{
@@ -30,100 +35,50 @@ app.listen(5100,()=>{
     console.log("App Started");
 })
 
-app.use(bodyParser.json());
 
-// Upload audio file to remote server (AWS)
-// Set your AWS credentials and S3 bucket region
-AWS.config.update({
-    accessKeyId: 'AKIAXHX7F43KQ6P6I2U2',
-    secretAccessKey: '7Uddh8TYgYdkjRi8ecKpRZD+Y4zu6pc6+DXkOUnk',
-    region: 'eu-north-1'
-});
+import dotenv from 'dotenv';
+dotenv.config();
 
-app.post('/api/data', upload.single('audio'),(req, res) => {
-    audioBuffer = req.file.buffer;
-    const audioBlob = new Blob([audioBuffer])
-    // console.log(req);
-    console.log('Received file info:', audioBlob);
-    audioBlob.type = "audio/mp3"
-    // Process the URL as needed
-    res.send('MP3 file received successfully!');
-    console.log('Received Blob Size:', audioBlob.size);
-    // Create an S3 instance
-    const s3 = new AWS.S3();
+// Your code here
 
-    // Convert blob to stream
-    // function blobToStream(blob) {
-    //     const buffer = Buffer.from(blob, 'base64');
-    //     const readable = new Readable();
-    //     readable._read = () => {
-    //     };
-    //     readable.push(buffer);
-    //     readable.push(null);
-    //     return readable;
-    // }
+import fetch from 'node-fetch';
+// const fs = require('fs');
+const url = 'https://api.assemblyai.com/v2/upload';
 
+let audioPath = '../test.mp3';
+const API_KEY = "7d823a3e6ffe44f29465aabf105aadc8";
 
-    // const audioStream = blobToStream(audioBlob)
-    // const audioStream = await audioBlob.stream();
-    // console.log(audioStream)
-    // const audioBuffer1 = audioBlobToBuffer(audioBlob);
+fs.readFile(audioPath, (err, data) => {
+    if (err) {
+        return console.log(err);
+    }
 
-    // Set S3 upload parameters
-    const uploadParams = {
-        Bucket: 'voicepen',
-        Key: 'audio12.mp3',
-        Body: audioBlob,
-        ContentType: 'audio/mp3',
-        ACL: 'public-read' // Make the uploaded file public
+    const params = {
+        headers: {
+            "authorization": API_KEY,
+            "Transfer-Encoding": "chunked"
+        },
+        body: data,
+        method: 'POST'
     };
 
-    // Upload the file to S3
-    s3.upload(uploadParams, (err, data) => {
-        if (err) {
-            console.error('Error uploading file:', err);
-        } else {
-            console.log('File uploaded successfully. Public URL:', data.Location);
-            // getTranscript(data.Location)
-            //     .then(response => response.text())
-        }
-    });
+
+    fetch(url, params)
+        .then(response => response.json())
+        .then(data => {
+            console.log(`URL: ${data['upload_url']}`)
+            getTranscript(data['upload_url'])
+        })
+        .catch((error) => {
+            console.error(`Error: ${error}`);
+        });
 
 });
-
-
-
-// app.post('/api/data/url', (req, res) => {
-//     let mp3FileUrl = req.query.url;
-//     // mp3FileUrl = mp3FileUrl.substring(5)
-//     console.log('Received MP3 file URL:', mp3FileUrl);
-//     // Process the URL as needed
-//     res.send('MP3 file URL received successfully!');
-//
-//     const uploadUrl = uploadOnServer("../test.mp3");
-//     getTranscript(uploadUrl);
-// });
-//
-// const baseUrl = 'https://api.assemblyai.com/v2'
-//
-// const headers = {
-//     authorization: '7d823a3e6ffe44f29465aabf105aadc8'
-// }
-
-// var uploadOnServer = async (mp3FileUrl) => {
-//     const path = '../test.mp3';
-//     const audioData = await fs.readFile(path)
-//     const uploadResponse = await axios.post(`${baseUrl}/upload`, audioData, {
-//         headers
-//     })
-//     const uploadUrl = uploadResponse.data.upload_url
-//     return uploadUrl;
-// }
 
 const assembly = axios.create({
     baseURL: "https://api.assemblyai.com/v2",
     headers: {
-        authorization: APIKey,
+        authorization: API_KEY,
         "content-type": "application/json",
     },
 })
@@ -158,6 +113,13 @@ const getTranscript = async (audioURL) => {
         }
     }, refreshInterval)
 }
+
+
+
+
+
+
+
 
 
 
