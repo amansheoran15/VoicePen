@@ -5,6 +5,7 @@ const controls = document.querySelector("#controls");
 // const audioPlayer = document.querySelector("#audioPlayer");
 const time = document.querySelector("#time");
 const transcribe = document.querySelector("#transcribe");
+const submitBtn = document.querySelector("#submit-audio");
 
 let audioRecordStartTime;
 let elapsedTimeTimer;
@@ -76,6 +77,19 @@ if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
     console.log("getUserMedia not supported on your browser!");
 }
 
+submitBtn.onclick = (e) => {
+    e.preventDefault();
+    blob = document.querySelector(".uploaded-audio").files[0];
+    const url = URL.createObjectURL(blob);
+    const audio = document.createElement("audio");
+
+    soundClip.appendChild(audio);
+    audio.src = url;
+    audio.controls = true;
+    transcribe.removeAttribute("hidden");
+
+}
+
 
 transcribe.onclick = () => {
 
@@ -89,29 +103,18 @@ transcribe.onclick = () => {
         method: 'POST',
         body: formData
     })
-        .then((response) => {response.text()})
+        .then((response) => {return response.text()})
         .then(data => {
-            console.log('Response from server:', data);
+            const transcript = JSON.parse(data)
+            const text = removeConsecutiveDuplicateWords(transcript.text)
+            console.log(text);
         })
         .catch(error => {
             console.error('Error:', error);
         });
 
-
-    // fetch(`/api/data/url?url=${encodeURIComponent(audioURL)}`, {
-    //     method: 'POST',
-    //     headers: {
-    //         'Content-Type': 'application/json'
-    //     }
-    // })
-    //     .then(response => response.text())
-    //     .then(data => {
-    //         console.log('Response from server:', data);
-    //     })
-    //     .catch(error => {
-    //         console.error('Error:', error);
-    //     });
 }
+
 
 
 function computeElapsedTime(startTime) {
@@ -173,4 +176,17 @@ var displayElapsedTime = (elapsedTime,elapsedTimeTag) => {
     elapsedTimeTag.innerHTML = elapsedTime;
 }
 
+function removeConsecutiveDuplicateWords(inputString) {
+    let words = inputString.split(/\s+/); // Split the input string into words
+    let result = [words[0]]; // Initialize the result array with the first word
+
+    for (let i = 1; i < words.length; i++) {
+        if (words[i] !== words[i - 1]) {
+            // If the current word is not the same as the previous one, add it to the result array
+            result.push(words[i]);
+        }
+    }
+
+    return result.join(" "); // Join the words into a string using space as separator
+}
 

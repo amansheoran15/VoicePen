@@ -1,17 +1,19 @@
 import express from 'express';
-import path from 'path';
+import path, {dirname} from 'path';
 import axios from "axios";
-// const axios = require("axios")
-// // const audioURL = "https://bit.ly/3yxKEIY"
-// const APIKey = "7d823a3e6ffe44f29465aabf105aadc8"
-// const bodyParser = require('body-parser');
-// const AWS = require('aws-sdk');
+
 import fs from 'fs';
-// const multer = require('multer');
-// const upload = multer();
-// const stream = require('stream');
-// const { Readable } = require('stream');
-// const {response} = require("express");
+import multer from 'multer';
+import {fileURLToPath} from 'url';
+import dotenv from 'dotenv';
+import fetch from 'node-fetch';
+
+//Convert blob to mp3
+import ffmpeg from 'ffmpeg';
+const API_KEY = "7d823a3e6ffe44f29465aabf105aadc8";
+
+const upload = multer();
+
 const refreshInterval = 5000
 
 
@@ -21,8 +23,7 @@ const app = express();
 let audioURL;
 let audioBuffer;
 
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 app.use(express.static(path.join(__dirname,"public")));
@@ -35,45 +36,84 @@ app.listen(5100,()=>{
     console.log("App Started");
 })
 
-
-import dotenv from 'dotenv';
-dotenv.config();
-
-// Your code here
-
-import fetch from 'node-fetch';
-// const fs = require('fs');
 const url = 'https://api.assemblyai.com/v2/upload';
 
-let audioPath = '../test.mp3';
-const API_KEY = "7d823a3e6ffe44f29465aabf105aadc8";
+app.post('/api/data',upload.single('audio'),async (req, res) => {
+    try {
+        audioBuffer = req.file.buffer;
+        const audioBlobPath = 'audio.mp3';
+        fs.writeFileSync(audioBlobPath, audioBuffer);
 
-fs.readFile(audioPath, (err, data) => {
-    if (err) {
-        return console.log(err);
-    }
+        let audioPath;
+        convertBlobToMP3(audioBlobPath).then((response) => {
+            audioPath = response
+            console.log("Hello" + audioPath);
+            fs.readFile(audioPath.toString(), (err, data) => {
+                if (err) {
+                    return console.log("Error Occurred" + err);
+                }
 
-    const params = {
-        headers: {
-            "authorization": API_KEY,
-            "Transfer-Encoding": "chunked"
-        },
-        body: data,
-        method: 'POST'
-    };
+                const params = {
+                    headers: {
+                        "authorization": API_KEY,
+                        "Transfer-Encoding": "chunked"
+                    },
+                    body: data,
+                    method: 'POST'
+                };
 
 
-    fetch(url, params)
-        .then(response => response.json())
-        .then(data => {
-            console.log(`URL: ${data['upload_url']}`)
-            getTranscript(data['upload_url'])
+                fetch(url, params)
+                    .then(response => response.json())
+                    .then(async data => {
+                        console.log(`URL: ${data['upload_url']}`)
+                        getTranscript(data['upload_url']).then((response) => {
+                            let transcriptData = response
+                            console.log("Transcribed Text: " + transcriptData.data.text)
+                            res.send(transcriptData.data);
+
+                        });
+                        if (fs.existsSync(audioPath)) {
+                            fs.unlink(audioPath, (err) => {
+                                if (err) {
+                                    console.error('Error deleting file:', err);
+                                } else {
+                                    console.log('File deleted successfully');
+                                }
+                            });
+                            fs.unlink(audioBlobPath, (err) => {
+                                if (err) {
+                                    console.error('Error deleting file:', err);
+                                } else {
+                                    console.log('File deleted successfully');
+                                }
+                            });
+                        } else {
+                            console.log('File not found');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(`Error: ${error}`);
+                    });
+
+            });
+        }).catch((err)=> {
+            console.log(err);
         })
-        .catch((error) => {
-            console.error(`Error: ${error}`);
-        });
 
-});
+
+
+
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+})
+
+
+
+
 
 const assembly = axios.create({
     baseURL: "https://api.assemblyai.com/v2",
@@ -83,50 +123,58 @@ const assembly = axios.create({
     },
 })
 
-// assembly
-//     .post("/transcript", {
-//         audio_url: audioURL
-//     })
-//     .then((res) => console.log(res.data))
-//     .catch((err) => console.error(err));
-
 const getTranscript = async (audioURL) => {
-    // Sends the audio file to AssemblyAI for transcription
-    const response = await assembly.post("/transcript", {
-        audio_url: audioURL,
-    })
 
-    // Interval for checking transcript completion
-    const checkCompletionInterval = setInterval(async () => {
-        const transcript = await assembly.get(`/transcript/${response.data.id}`)
-        const transcriptStatus = transcript.data.status
+    return new Promise(async (resolve, reject) => {
+        const response = await assembly.post("/transcript", {
+            audio_url: audioURL,
+            disfluencies: false,
+            format_text: true,
+            summarization: true
+        });
 
-        if (transcriptStatus !== "completed") {
-            console.log(`Transcript Status: ${transcriptStatus}`)
-        } else if (transcriptStatus === "completed") {
-            console.log("\nTranscription completed!\n")
-            let transcriptText = transcript.data.text
-            console.log(`Your transcribed text:\n\n${transcriptText}`)
-            clearInterval(checkCompletionInterval)
-        }else if(transcriptStatus === "error"){
-            clearInterval(checkCompletionInterval)
-        }
-    }, refreshInterval)
+        const checkCompletionInterval = setInterval(async () => {
+            try {
+                const transcript = await assembly.get(`/transcript/${response.data.id}`);
+                const transcriptStatus = transcript.data.status;
+
+                if (transcriptStatus === "completed") {
+                    clearInterval(checkCompletionInterval);
+                    resolve(transcript);
+                } else if (transcriptStatus === "error") {
+                    clearInterval(checkCompletionInterval);
+                    reject(new Error("Transcription failed"));
+                } else {
+                    console.log(`Transcript Status: ${transcriptStatus}`);
+                }
+            } catch (error) {
+                clearInterval(checkCompletionInterval);
+                reject(error);
+            }
+        }, refreshInterval);
+    });
+}
+
+
+function convertBlobToMP3(audioBlob){
+    return new Promise((resolve, reject) => {
+        const process = new ffmpeg(audioBlob);
+        process.then(function (audio){
+                audio.fnExtractSoundToMP3('../audio12.mp3',function (err,file){
+                    if(!err){
+                        console.log("Audio file: " + file)
+                        resolve(file);
+                    }
+                });
+            }, function (err){
+                console.log("Error: "+ err);
+                reject(err);
+            }
+        );
+    });
 }
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-// getTranscript(audioURL)
 
 
