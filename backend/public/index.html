@@ -3,25 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <title>Voice Recorder</title>
+    <link href="css/style.css" rel="stylesheet">
 </head>
 <body>
         <div id="controls">
-            <button id="record">Start Recording</button>
-            <button id="stop" disabled>Stop Recording</button>
-            <button id="transcribe" hidden>Transcribe</button>
+            <button id="record" class="control-button">Start Recording</button>
+            <button id="stop" class="control-button" disabled>Stop Recording</button>
+
+        </div>
+        <div id="audio-player">
             <div id="time" ></div>
+            <article id="sound-clip">
+    <!--            <audio id="audioPlayer" controls></audio>-->
+            </article>
+        </div>
+        <div id="upload">
             <form>
                 <input type="file" accept="audio/*" class="uploaded-audio">
                 <button type="submit" id="submit-audio">Upload</button>
 
             </form>
+        </div>
+
+        <div id="function-controls">
+            <button id="transcribe" class="control-button" hidden>Transcribe</button>
+            <button id="summary" class="control-button" hidden>Summarize</button>
+        </div>
+
+        <div id="transcribed-text">
 
         </div>
-        <article id="sound-clip">
-<!--            <audio id="audioPlayer" controls></audio>-->
-        </article>
 
-        <script src="https://apis.google.com/js/api.js"></script>
+        <div id="summarized-text">
+
+        </div>
+
+
 <!--        <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>-->
         <script src="js/script.js" ></script>
 </body>

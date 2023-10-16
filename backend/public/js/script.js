@@ -6,6 +6,9 @@ const controls = document.querySelector("#controls");
 const time = document.querySelector("#time");
 const transcribe = document.querySelector("#transcribe");
 const submitBtn = document.querySelector("#submit-audio");
+const summarize = document.querySelector("#summary");
+let transcribedText = document.querySelector("#transcribed-text");
+let summarizedText = document.querySelector("#summarized-text");
 
 let audioRecordStartTime;
 let elapsedTimeTimer;
@@ -63,6 +66,7 @@ if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
                 chunks = [];
                 audioURL = URL.createObjectURL(blob);
                 audio.src = audioURL;
+                audio.setAttribute("class","custom-audio-player")
                 audio.controls = true;
                 // audioPlayer.setAttribute("src",audioURL);
 
@@ -79,6 +83,7 @@ if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
 
 submitBtn.onclick = (e) => {
     e.preventDefault();
+    soundClip.innerHTML = "";
     blob = document.querySelector(".uploaded-audio").files[0];
     const url = URL.createObjectURL(blob);
     const audio = document.createElement("audio");
@@ -105,15 +110,55 @@ transcribe.onclick = () => {
     })
         .then((response) => {return response.text()})
         .then(data => {
+            alert("Transcribed successfully!")
             const transcript = JSON.parse(data)
-            const text = removeConsecutiveDuplicateWords(transcript.text)
-            console.log(text);
+            let text = removeConsecutiveDuplicateWords(transcript.text)
+            // console.log(text);
+            // console.log(transcript.summary);
+            transcribedText.innerHTML = "";
+            const transcribedPara = document.createElement("textarea");
+            transcribedPara.innerText = text
+            transcribedText.append(transcribedPara);
+            transcribedPara.setAttribute("class","text-box")
+
+
+            summarize.removeAttribute("hidden");
+            summarize.onclick = () => {
+                text = transcribedPara.value;
+                console.log(text);
+
+                fetch('/summary', {
+                    method: 'POST',
+                    headers: {
+                       'Content-Type': 'text/plain'
+                    },
+                    body: text,
+
+
+                })
+                    .then((response) => {
+                        console.log(response.ok)
+                        return response.text()
+                    })
+                    .then(data => {
+                        const result = JSON.parse(data)
+                        summarizedText.innerHTML = "";
+                        const summarizedPara = document.createElement("textarea")
+                        summarizedPara.innerText = result[0].summary_text;
+                        summarizedPara.setAttribute("class","text-box")
+                        summarizedText.append(summarizedPara);
+                    })
+            }
+
+
         })
         .catch(error => {
             console.error('Error:', error);
         });
+    alert("Transcribing... This could take a minute or two, please wait.")
 
 }
+
 
 
 
@@ -189,4 +234,6 @@ function removeConsecutiveDuplicateWords(inputString) {
 
     return result.join(" "); // Join the words into a string using space as separator
 }
+
+
 

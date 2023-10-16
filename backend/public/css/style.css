@@ -1,0 +1,57 @@
+body{
+    background-color: beige;
+}
+
+#controls{
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    justify-content: center;
+    margin: 10rem auto;
+    margin-bottom: 0rem;
+    width: 30vw;
+
+}
+
+#upload{
+    display: flex;
+    justify-content: center;
+}
+
+#sound-clip{
+    display: block;
+    height: fit-content;
+}
+
+.control-button{
+    margin: auto 1rem;
+}
+
+#audio-player{
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+    min-height: 2rem;
+}
+
+#function-controls{
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    margin: auto;
+    margin-top: 2rem;
+    width: 30vw;
+}
+
+#transcribed-text, #summarized-text{
+    width: 70vw;
+    height: 10rem;
+    margin: auto;
+    padding: 1rem;
+}
+
+.text-box{
+    margin: auto;
+    height: inherit;
+    width: inherit;
+}

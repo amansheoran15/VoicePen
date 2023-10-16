@@ -27,6 +27,8 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 app.use(express.static(path.join(__dirname,"public")));
+app.use(express.json());
+app.use(express.text());
 
 // app.get("/",(req,res)=>{
 //     res.sendFile("index.html")
@@ -130,7 +132,9 @@ const getTranscript = async (audioURL) => {
             audio_url: audioURL,
             disfluencies: false,
             format_text: true,
-            summarization: true
+            summarization: true,
+            summary_model: 'informative',
+            summary_type: 'bullets_verbose'
         });
 
         const checkCompletionInterval = setInterval(async () => {
@@ -173,6 +177,36 @@ function convertBlobToMP3(audioBlob){
         );
     });
 }
+
+app.post('/summary',(req,res)=>{
+    const text = req.body;
+    console.log(text);
+    query({
+        inputs: text,
+        options: {
+            wait_for_model: true
+        }
+    }).then((response) => {
+        console.log(response);
+        res.send(JSON.stringify(response));
+    });
+})
+
+const API_TOKEN = "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";
+
+async function query(data) {
+    const response = await fetch(
+        "https://api-inference.huggingface.co/models/facebook/bart-large-cnn",
+        {
+            headers: { Authorization: `Bearer ${API_TOKEN}` },
+            method: "POST",
+            body: JSON.stringify(data),
+        }
+    );
+    const result = await response.json();
+    return result;
+}
+
 
 
 
