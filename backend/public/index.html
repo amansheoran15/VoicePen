@@ -3,43 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <title>Voice Recorder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&family=Pixelify+Sans:wght@600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link href="css/style.css" rel="stylesheet">
 </head>
 <body>
-        <div id="controls">
-            <button id="record" class="control-button">Start Recording</button>
-            <button id="stop" class="control-button" disabled>Stop Recording</button>
+
+        <div id="title">VoicePen</div>
+        <div id="controller">
+            <div class="sub-title">Record</div>
+            <table>
+                <tr>
+                    <td><button type="button" id="record" class="btn btn-danger control-button"><i class="fa-solid fa-microphone"></i></button></td>
+                    <td><button type="button" id="stop" class="btn btn-warning control-button" disabled><i class="fa-solid fa-stop"></i></button></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div id="time" ></div>
+                        <article id="sound-clip">
+                            <!--            <audio id="audioPlayer" controls></audio>-->
+                        </article>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="choose-file" id="choose-file-label" class="btn btn-secondary control-button"><i class="fa-solid fa-paperclip"></i></label>
+                        <input id="choose-file" type="file" style="display: none;" accept="audio/*" class="uploaded-audio">
+                    </td>
+                    <td><button id="submit-audio" type="submit" class="btn btn-success control-button" disabled><i class="fa-solid fa-file-arrow-up"></i></button></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div id="file-name"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2"><button id="transcribe" class="btn btn-success" disabled>Transcribe  <i class="fa-solid fa-rocket"></i></button></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><button id="summary" class="btn btn-success" disabled>Summarize  <i class="fa-solid fa-bolt"></i></button></td>
+                </tr>
+            </table>
+        </div>
+        <div id="text-displayer">
+            <div id="transcribed-text">
+
+            </div>
+
+            <div id="summarized-text">
+
+            </div>
 
         </div>
-        <div id="audio-player">
-            <div id="time" ></div>
-            <article id="sound-clip">
-    <!--            <audio id="audioPlayer" controls></audio>-->
-            </article>
-        </div>
-        <div id="upload">
-            <form>
-                <input type="file" accept="audio/*" class="uploaded-audio">
-                <button type="submit" id="submit-audio">Upload</button>
 
-            </form>
-        </div>
-
-        <div id="function-controls">
-            <button id="transcribe" class="control-button" hidden>Transcribe</button>
-            <button id="summary" class="control-button" hidden>Summarize</button>
-        </div>
-
-        <div id="transcribed-text">
-
-        </div>
-
-        <div id="summarized-text">
-
-        </div>
-
-
-<!--        <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/8de4607864.js" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
         <script src="js/script.js" ></script>
 </body>
 </html>

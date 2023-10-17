@@ -2,12 +2,45 @@ body{
     background-color: beige;
 }
 
+#controller{
+    width: 22.05vw;
+}
+
+#controller table{
+    width: 100%;
+
+}
+
+#controller table,td{
+    /*border: 1px solid black;*/
+    text-align: center;
+}
+
+#controller td{
+    padding-bottom: 1rem;
+}
+
+#title{
+    margin: auto;
+    text-align: center;
+    font-size: 4.5rem;
+    font-family: 'Pixelify Sans', sans-serif;
+}
+
+.sub-title{
+    margin: auto;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-size: 3rem;
+    font-family: 'Pixelify Sans', sans-serif;
+}
+
 #controls{
     display: flex;
     flex-wrap: nowrap;
     flex-direction: row;
     justify-content: center;
-    margin: 10rem auto;
+    margin: 3rem auto;
     margin-bottom: 0rem;
     width: 30vw;
 
@@ -16,6 +49,33 @@ body{
 #upload{
     display: flex;
     justify-content: center;
+    width: 0;
+    margin: auto;
+    /*align-items: center;*/
+}
+
+
+
+#submit-audio{
+    padding: 1rem;
+    /*height: fit-content;*/
+    /*margin-left: 2rem;*/
+}
+
+#choose-file-label{
+    /*height: fit-content;*/
+    padding: 1rem;
+    background-color: #acacac;
+    color: whitesmoke;
+    border: 0;
+}
+
+.fa-paperclip{
+    font-size: 3rem;
+}
+
+.fa-file-arrow-up{
+    font-size: 3rem;
 }
 
 #sound-clip{
@@ -25,13 +85,29 @@ body{
 
 .control-button{
     margin: auto 1rem;
+    height: 100px;
+    width: 75px;
+}
+
+.fa-microphone{
+    font-size: 3rem;
+}
+
+.fa-stop{
+    font-size: 3rem;
+    color: whitesmoke;
 }
 
 #audio-player{
     display: flex;
     justify-content: center;
-    padding: 2rem;
+    padding: 1rem;
     min-height: 2rem;
+}
+
+#time{
+    font-size: 1.5rem;
+    font-family: 'Pixelify Sans', sans-serif;
 }
 
 #function-controls{
@@ -41,6 +117,19 @@ body{
     margin: auto;
     margin-top: 2rem;
     width: 30vw;
+}
+
+#transcribe{
+    padding: 0.5rem 1.75rem;
+    height: fit-content;
+    font-size: 1.5rem;
+    background-color: black;
+}
+
+#summary{
+    padding: 0.5rem 1.75rem;
+    height: fit-content;
+    font-size: 1.5rem;
 }
 
 #transcribed-text, #summarized-text{

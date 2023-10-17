@@ -15,6 +15,13 @@ let elapsedTimeTimer;
 let audioURL;
 let blob;
 
+$("#choose-file").change(function() {
+    filename = this.files[0].name;
+    console.log(filename);
+    $('#file-name').text(filename);
+    $('#submit-audio').removeAttr("disabled");
+});
+
 if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
     console.log("Media supported");
     navigator.mediaDevices
@@ -31,6 +38,7 @@ if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
                 mediaRecorder.start();
                 console.log("Recording started");
                 console.log(mediaRecorder.state);
+                transcribe.setAttribute("disabled","")
                 time.removeAttribute("hidden");
                 stop.removeAttribute("disabled");
                 record.setAttribute("disabled","");
@@ -70,7 +78,7 @@ if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
                 audio.controls = true;
                 // audioPlayer.setAttribute("src",audioURL);
 
-                transcribe.removeAttribute("hidden");
+                transcribe.removeAttribute("disabled");
 
             }
         })
@@ -91,7 +99,7 @@ submitBtn.onclick = (e) => {
     soundClip.appendChild(audio);
     audio.src = url;
     audio.controls = true;
-    transcribe.removeAttribute("hidden");
+    transcribe.removeAttribute("disabled");
 
 }
 
@@ -111,6 +119,7 @@ transcribe.onclick = () => {
         .then((response) => {return response.text()})
         .then(data => {
             alert("Transcribed successfully!")
+            summarize.removeAttribute("disabled")
             const transcript = JSON.parse(data)
             let text = removeConsecutiveDuplicateWords(transcript.text)
             // console.log(text);
