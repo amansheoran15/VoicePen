@@ -105,6 +105,9 @@ submitBtn.onclick = (e) => {
 
 
 transcribe.onclick = () => {
+    transcribe.setAttribute("disabled","")
+    const transcribedPara = document.querySelector("#transcription-textbox");
+    transcribedPara.innerText = "";
 
     const formData = new FormData();
     console.log('FormData:', formData);
@@ -116,25 +119,32 @@ transcribe.onclick = () => {
         method: 'POST',
         body: formData
     })
-        .then((response) => {return response.text()})
+        .then((response) => {
+            return response.text()
+        })
         .then(data => {
             alert("Transcribed successfully!")
+            transcribe.removeAttribute("disabled");
             summarize.removeAttribute("disabled")
             const transcript = JSON.parse(data)
             let text = removeConsecutiveDuplicateWords(transcript.text)
             // console.log(text);
             // console.log(transcript.summary);
-            transcribedText.innerHTML = "";
-            const transcribedPara = document.createElement("textarea");
+
+            // transcribedText.innerHTML = "";
             transcribedPara.innerText = text
-            transcribedText.append(transcribedPara);
-            transcribedPara.setAttribute("class","text-box")
+            // transcribedText.append(transcribedPara);
+            transcribedPara.removeAttribute("disabled")
 
 
             summarize.removeAttribute("hidden");
             summarize.onclick = () => {
+                summarize.setAttribute("disabled","");
                 text = transcribedPara.value;
                 console.log(text);
+                const summarizedPara = document.querySelector("#summary-textbox")
+                summarizedPara.innerText = "";
+
 
                 fetch('/summary', {
                     method: 'POST',
@@ -147,16 +157,19 @@ transcribe.onclick = () => {
                 })
                     .then((response) => {
                         console.log(response.ok)
+
                         return response.text()
                     })
                     .then(data => {
+                        summarize.removeAttribute("disabled");
                         const result = JSON.parse(data)
-                        summarizedText.innerHTML = "";
-                        const summarizedPara = document.createElement("textarea")
+                        // summarizedText.innerHTML = "";
+
                         summarizedPara.innerText = result[0].summary_text;
-                        summarizedPara.setAttribute("class","text-box")
-                        summarizedText.append(summarizedPara);
+                        // summarizedPara.setAttribute("class","text-box")
+                        // summarizedText.append(summarizedPara);
                     })
+                alert("Summarizing.. please wait")
             }
 
 
