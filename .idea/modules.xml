@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/VoicePen.iml" filepath="$PROJECT_DIR$/.idea/VoicePen.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Web Club Bot/.idea/Web Club Bot.iml" filepath="$PROJECT_DIR$/../Web Club Bot/.idea/Web Club Bot.iml" />
     </modules>
   </component>
 </project>

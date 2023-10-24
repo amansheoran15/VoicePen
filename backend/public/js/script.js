@@ -2,7 +2,6 @@ const record = document.querySelector("#record");
 const stop = document.querySelector("#stop");
 const soundClip = document.querySelector("#sound-clip");
 const controls = document.querySelector("#controls");
-// const audioPlayer = document.querySelector("#audioPlayer");
 const time = document.querySelector("#time");
 const transcribe = document.querySelector("#transcribe");
 const submitBtn = document.querySelector("#submit-audio");
@@ -13,8 +12,9 @@ let summarizedText = document.querySelector("#summarized-text");
 let audioRecordStartTime;
 let elapsedTimeTimer;
 let audioURL;
-let blob;
+let blob;   //Blob to store audio recording
 
+//When audio file is chosen to be uploaded, load the filename onto the page and enable the upload button
 $("#choose-file").change(function() {
     filename = this.files[0].name;
     console.log(filename);
@@ -22,6 +22,7 @@ $("#choose-file").change(function() {
     $('#submit-audio').removeAttr("disabled");
 });
 
+//If microphone is connected to the system
 if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
     console.log("Media supported");
     navigator.mediaDevices
@@ -33,6 +34,7 @@ if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
         .then((stream) => {
             const mediaRecorder = new MediaRecorder(stream);
 
+            //To start recording
             record.onclick = () => {
                 soundClip.innerHTML = ""
                 mediaRecorder.start();
@@ -43,10 +45,12 @@ if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
                 stop.removeAttribute("disabled");
                 record.setAttribute("disabled","");
 
-                // controls.appendChild(time);
+                //To display timer of recording
                 audioRecordStartTime = new Date();
                 handleElapsedRecTime();
             }
+
+            //To stop recording
             stop.onclick = () =>{
                 mediaRecorder.stop();
                 console.log("Recording stopped");
@@ -54,15 +58,18 @@ if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
                 stop.setAttribute("disabled","");
                 record.removeAttribute("disabled");
 
+                //Hide the timer
                 clearInterval(elapsedTimeTimer);
                 time.setAttribute("hidden","");
             }
 
+            //Push all the binary audio data into chunks
             let chunks = [];
             mediaRecorder.ondataavailable = (e) =>{
                 chunks.push(e.data);
             }
 
+            //After recording stops
             mediaRecorder.onstop = (e) => {
                 console.log("Recorder Stopped");
 
@@ -70,6 +77,7 @@ if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
 
                 soundClip.appendChild(audio);
 
+                //Create blob with audio chunks and set src of audio tag to url of this blob
                 blob = new Blob(chunks, {type : "audio/mp3"});
                 chunks = [];
                 audioURL = URL.createObjectURL(blob);
@@ -89,6 +97,7 @@ if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
     console.log("getUserMedia not supported on your browser!");
 }
 
+//On uploading the audio file from system, make a blob of the audio file and set src of audio to url of blob object
 submitBtn.onclick = (e) => {
     e.preventDefault();
     soundClip.innerHTML = "";
@@ -103,18 +112,19 @@ submitBtn.onclick = (e) => {
 
 }
 
-
+//On clicking transcribe button
 transcribe.onclick = () => {
+    //Disable the button
     transcribe.setAttribute("disabled","")
     const transcribedPara = document.querySelector("#transcription-textbox");
     transcribedPara.innerText = "";
 
+    //Create a new FormData object and pass audio blob through this object
     const formData = new FormData();
-    console.log('FormData:', formData);
-    console.log('Blob Size:', blob.size);
-    console.log('Blob Type:', blob.type);
     formData.append('audio', blob, 'audio.mp3');
     console.log('FormData:', formData.get('audio'));
+
+    //Make a post request to transcribe the audio recording
     fetch(`/api/data`, {
         method: 'POST',
         body: formData
@@ -127,25 +137,25 @@ transcribe.onclick = () => {
             transcribe.removeAttribute("disabled");
             summarize.removeAttribute("disabled")
             const transcript = JSON.parse(data)
-            let text = removeConsecutiveDuplicateWords(transcript.text)
-            // console.log(text);
-            // console.log(transcript.summary);
 
-            // transcribedText.innerHTML = "";
+            //To remove repeating words in the transcription
+            let text = removeConsecutiveDuplicateWords(transcript.text)
+
             transcribedPara.innerText = text
-            // transcribedText.append(transcribedPara);
             transcribedPara.removeAttribute("disabled")
 
-
+            //Once the recording is transcribed successfully, enable the summarize button
             summarize.removeAttribute("hidden");
             summarize.onclick = () => {
                 summarize.setAttribute("disabled","");
+
+                //Again fetch the textarea text so that if user has changed anything in the transcription, summary would be based on the changed text.
                 text = transcribedPara.value;
                 console.log(text);
                 const summarizedPara = document.querySelector("#summary-textbox")
                 summarizedPara.innerText = "";
 
-
+                //Make a post request to get summary
                 fetch('/summary', {
                     method: 'POST',
                     headers: {
@@ -163,11 +173,8 @@ transcribe.onclick = () => {
                     .then(data => {
                         summarize.removeAttribute("disabled");
                         const result = JSON.parse(data)
-                        // summarizedText.innerHTML = "";
 
                         summarizedPara.innerText = result[0].summary_text;
-                        // summarizedPara.setAttribute("class","text-box")
-                        // summarizedText.append(summarizedPara);
                     })
                 alert("Summarizing.. please wait")
             }
@@ -181,8 +188,7 @@ transcribe.onclick = () => {
 
 }
 
-
-
+//Functions to handle timer starts
 
 function computeElapsedTime(startTime) {
     //record end time
@@ -243,6 +249,9 @@ var displayElapsedTime = (elapsedTime,elapsedTimeTag) => {
     elapsedTimeTag.innerHTML = elapsedTime;
 }
 
+//Functions to handle timer ends
+
+//to remove repeated words
 function removeConsecutiveDuplicateWords(inputString) {
     let words = inputString.split(/\s+/); // Split the input string into words
     let result = [words[0]]; // Initialize the result array with the first word

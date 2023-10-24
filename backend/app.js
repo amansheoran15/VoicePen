@@ -25,9 +25,10 @@ let audioURL;
 let audioBuffer;
 
 //To serve pages from public folder
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-app.use(express.static(path.join(__dirname,"public")));
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = dirname(__filename);
+// app.use(express.static(path.join(__dirname,"public")));
+app.use(express.static("./public"));
 app.use(express.json());
 app.use(express.text());
 
