@@ -1,2 +1,3 @@
-/backend/.env
-/screenshots
+/backend/config/.env
+/video demonstration.mov
+/backend/node_modules

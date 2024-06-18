@@ -151,7 +151,6 @@ transcribe.onclick = () => {
 
                 //Again fetch the textarea text so that if user has changed anything in the transcription, summary would be based on the changed text.
                 text = transcribedPara.value;
-                console.log(text);
                 const summarizedPara = document.querySelector("#summary-textbox")
                 summarizedPara.innerText = "";
 

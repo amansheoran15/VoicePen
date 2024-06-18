@@ -42,7 +42,6 @@ body{
 
 .sub-title{
     margin: auto;
-    margin-bottom: 2rem;
     text-align: center;
     font-size: 3rem;
     font-family: 'Pixelify Sans', sans-serif;
@@ -157,9 +156,10 @@ body{
 .text-content{
     width: 100%;
     height: 80%;
-    margin: auto;
+    margin: 2rem auto;
     /*padding: 1rem;*/
     border: 1px solid rgba(245, 245, 245, 0.25);
+    /*margin-top: 2rem;*/
 
 }
 

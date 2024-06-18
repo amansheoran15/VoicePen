@@ -2,22 +2,29 @@
 import express from 'express';
 import path, {dirname} from 'path';
 import axios from "axios";
+import userRouter from "./routers/user.js";
+import connectToDB from "./config/database.js";
+import cookieParser from "cookie-parser";
+import bodyParser from "body-parser";
 
 import fs from 'fs';
 import multer from 'multer';
 import {fileURLToPath} from 'url';
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
+dotenv.config({path:"./config/.env"});
 
 //Convert blob to mp3
 import ffmpeg from 'ffmpeg';
+import authenticate from "./middlewares/auth.js";
+// import * as bodyParser from "express";
 
 
 const upload = multer();
 
 const refreshInterval = 5000
 
-
+connectToDB();
 
 
 const app = express();
@@ -29,16 +36,27 @@ let audioBuffer;
 // const __dirname = dirname(__filename);
 // app.use(express.static(path.join(__dirname,"public")));
 app.use(express.static("./public"));
+app.set('view engine', 'ejs');
+app.set('views','./public/views')
 app.use(express.json());
 app.use(express.text());
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use('/',userRouter);
+app.get('/', authenticate,(req,res)=>{
+    res.render('index');
+})
+
+// const __dirname = dirname(fileURLToPath(import.meta.url));
+// app.use(express.static(__dirname+"/public"))
 
 //Loading environment variables
-dotenv.config();
 const ASSEMBLYAI_API_KEY = process.env.ASSEMBLYAI_API_KEY;
 
 //Make server listen on port 3000
 app.listen(3000,()=>{
-    console.log("App Started");
+    console.log(`App Started successfully on PORT : 3000`);
 })
 
 
